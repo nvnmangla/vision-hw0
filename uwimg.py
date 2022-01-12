@@ -1,12 +1,16 @@
-import sys, os
-from ctypes import *
-import math
+import os
+import sys
 import random
+import math
+from ctypes import *
+
+
 
 def c_array(ctype, values):
     arr = (ctype*len(values))()
     arr[:] = values
     return arr
+
 
 class IMAGE(Structure):
     _fields_ = [("w", c_int),
@@ -17,7 +21,9 @@ class IMAGE(Structure):
 
 #lib = CDLL("/home/pjreddie/documents/455/libuwimg.so", RTLD_GLOBAL)
 #lib = CDLL("libuwimg.so", RTLD_GLOBAL)
-lib = CDLL(os.path.join(os.path.dirname(__file__), "libuwimg.so"), RTLD_GLOBAL)
+
+# This was originally os.path.dirname(__FILE__) which return empty
+lib = CDLL(os.path.join(os.getcwd(), "libuwimg.so"), RTLD_GLOBAL)
 
 make_image = lib.make_image
 make_image.argtypes = [c_int, c_int, c_int]
@@ -46,25 +52,27 @@ hsv_to_rgb.argtypes = [IMAGE]
 shift_image = lib.shift_image
 shift_image.argtypes = [IMAGE, c_int, c_float]
 
-clamp_image = lib.clamp_image
-clamp_image.argtypes = [IMAGE]
+# clamp_image = lib.clamp_image
+# clamp_image.argtypes = [IMAGE]
 
 load_image_lib = lib.load_image
 load_image_lib.argtypes = [c_char_p]
 load_image_lib.restype = IMAGE
 
+
 def load_image(f):
     return load_image_lib(f.encode('ascii'))
+
 
 save_image_lib = lib.save_image
 save_image_lib.argtypes = [IMAGE, c_char_p]
 
+
 def save_image(im, f):
     return save_image_lib(im, f.encode('ascii'))
+
 
 if __name__ == "__main__":
     im = load_image("data/dog.jpg")
     save_image(im, "hey")
-
-    
 
